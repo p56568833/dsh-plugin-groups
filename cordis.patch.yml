@@ -1,0 +1,8 @@
+# dsh-plugin-groups bundle patch: inserts the plugin row into the web profile
+# roster. The row is a bare plugin by package name; the node half (exports ".")
+# is a no-op that only makes the row exist, and the `dsh.client` declaration in
+# package.json makes the browser half (exports "./client") load in the web GUI,
+# where it groups the Plugins page's "Installed" list in place.
+- insert:
+    - id: plugin-groups
+      name: 'dsh-plugin-groups'

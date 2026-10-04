@@ -1,0 +1,52 @@
+{
+  "name": "dsh-plugin-groups",
+  "version": "0.1.0",
+  "description": "插件页「已安装」列表的一行分类 Tab（全部 / 界面与外观 / 用量与账户 …），点哪个只看哪一类、选中的会记住；补丁插件挂在它修的插件下面。纯显示层——不碰任何其他插件、不碰 DSH 代码，卸载即彻底复原。",
+  "license": "MIT",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "plugins",
+    "tabs",
+    "ui"
+  ],
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh.md",
+    "LICENSE",
+    "screenshots.json",
+    "docs",
+    "verify.mjs",
+    "locale"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [],
+      "immediately": true
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/p56568833/dsh-plugin-groups.git"
+  },
+  "homepage": "https://github.com/p56568833/dsh-plugin-groups#readme",
+  "bugs": {
+    "url": "https://github.com/p56568833/dsh-plugin-groups/issues"
+  }
+}

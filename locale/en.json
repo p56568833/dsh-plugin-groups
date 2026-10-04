@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Plugin groups",
+    "description": "Adds one row of category tabs (All / Appearance & UI / Usage & account …) to the Plugins page's Installed list: pick a tab to see only that category, and the choice is remembered. Patch plugins are nested under the plugin they patch. Display layer only — it touches no other plugin and no DSH code, and uninstalling restores the page exactly."
+  }
+}
