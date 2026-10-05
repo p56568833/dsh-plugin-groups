@@ -41,7 +41,7 @@
  * 标题会被「插件汉化」改写、还会跟着界面语言变；包名唯一、稳定、不受汉化与语言影响。
  * 表里点名了当前已安装的每一个包，新装的插件走关键词兜底，最后落「其他」，不会丢卡片。
  *
- * 手写的 loader 闭包工厂格式（没有打包器这一步），与 dsh-skin-fixes / dsh-market-sidebar 一致。
+ * 手写的 loader 闭包工厂格式（没有打包器这一步），与 dsh-market-sidebar 一致。
  *
  * @module dsh-plugin-groups/client
  */
@@ -92,7 +92,7 @@ window.__ModuleLoader__.load({
         id: 'ui',
         zh: '界面与外观',
         en: 'Appearance & UI',
-        packages: ['dsh-better-sidebar', 'dsh-claude-style', 'dsh-skin-fixes', 'dsh-whale-splash', 'dsh-status-rotator', 'dsh-plugin-groups'],
+        packages: ['dsh-better-sidebar', 'dsh-claude-style', 'dsh-claude-style-addons', 'dsh-whale-splash', 'dsh-status-rotator', 'dsh-plugin-groups'],
         keywords: [/theme|skin|style|sidebar|status|splash|icon|font|visual|layout/],
       },
       {
@@ -147,12 +147,13 @@ window.__ModuleLoader__.load({
      * 父插件没装时，补丁照常单独显示，不缩进。
      *
      * 这张表是看各插件的说明手填的（目前没有任何机器可读的声明）：
-     *   · dsh-skin-fixes     「给 dsh-claude-style 皮肤打的两个行为补丁」
+     *   · dsh-claude-style-addons「dsh-claude-style 皮肤的补丁合集」—— 中文问候语 + 皮肤修补
+     *                         （2026-10-04 由 dsh-cn-greeting、dsh-skin-fixes 合并），选项画在皮肤自己的设置页里
      *   · dsh-story-progress 「商业故事写作模式：文笔迭代时显示实时进度」—— 显示的是 dsh-story-turing 的 story_loop
      *   · dsh-market-sidebar 「侧边栏加插件市场入口」—— 面板本体是 dshmarket 的 market.render()
      */
     const PARENTS = {
-      'dsh-skin-fixes': 'dsh-claude-style',
+      'dsh-claude-style-addons': 'dsh-claude-style',
       'dsh-story-progress': 'dsh-story-turing',
       'dsh-market-sidebar': 'dshmarket',
     }

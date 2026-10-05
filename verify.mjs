@@ -12,7 +12,7 @@
  *      （同时等于语法检查），再用一个只够用的假 DOM 真跑一遍 Tab：
  *      · 契约缺失（页面没开 / 分组 id 改了）时一行都不插，只留诊断状态；
  *      · 只分出一类时保持官方原样（不插 Tab、不过滤）；
- *      · 17 个真实已安装包 → 「全部 + 7 类」8 个 Tab，标签、计数、顺序全对；
+ *      · 18 个真实已安装包 → 「全部 + 7 类」8 个 Tab，标签、计数、顺序全对；
  *      · 点分类 Tab 只剩该类、点「全部」全回来、点在内层 span 上也管用（冒泡 + closest）；
  *      · 选中的 Tab 记进 localStorage，重开按它渲染；
  *      · 官方要滚到被当前分类挡住的卡时，临时按「全部」渲染，但**不改**用户的记忆；
@@ -93,6 +93,7 @@ const KNOWN_INSTALLED = [
   'dsh-balance-widget',
   'dsh-better-sidebar',
   'dsh-claude-style',
+  'dsh-claude-style-addons',
   'dsh-cost-balance',
   'dsh-image-gen',
   'dsh-market-sidebar',
@@ -104,7 +105,6 @@ const KNOWN_INSTALLED = [
   'dsh-story-turing',
   'dsh-todo-bar',
   'dshmarket',
-  'dsh-skin-fixes',
   'dsh-whale-splash',
 ]
 
@@ -544,7 +544,7 @@ function scenario(options = {}) {
   return { fake, storage, warnings, dispose: stop, tabbar, tabs, tab, cards, visible, visibleNames, rootAttr, ...page }
 }
 
-check('17 个真实已安装包 → 「全部 + 7 类」8 个 Tab，标签、计数、顺序、默认选中全对', () => {
+check('18 个真实已安装包 → 「全部 + 7 类」8 个 Tab，标签、计数、顺序、默认选中全对', () => {
   const live = scenario({ packages: KNOWN_INSTALLED })
   const { CATEGORIES, ALL_TAB, TAB_ATTR, ROOT_ATTR, ROOT_TAB_ATTR } = mod.__testing
   assertEqual(live.rootAttr(ROOT_ATTR), `active:${CATEGORIES.length}`, '诊断状态应为 active:7')
@@ -570,33 +570,55 @@ check('17 个真实已安装包 → 「全部 + 7 类」8 个 Tab，标签、计
   }
   assertEqual(live.visible().length, KNOWN_INSTALLED.length, '「全部」下每张卡都该看得见')
   live.dispose()
-  return `8 个 Tab（全部 17 + 7 类），计数与分类表一致；默认全部`
+  return `8 个 Tab（全部 ${KNOWN_INSTALLED.length} + 7 类），计数与分类表一致；默认全部`
 })
 
-check('补丁挂在父插件下面：排在父插件后一位、缩进标记、小标签；父插件不在时补丁照常单独显示', () => {
-  const { PARENTS, CHILD_ATTR, PARENT_ATTR, CARD_ATTR, TAB_ATTR } = mod.__testing
+check('补丁挂在父插件下面：排在父插件后面、缩进标记、小标签；一个父插件多个补丁按顺序排；父插件不在时补丁照常单独显示', () => {
+  const { PARENTS, CHILD_ATTR, PARENT_ATTR, CARD_ATTR } = mod.__testing
   const live = scenario({ packages: KNOWN_INSTALLED })
-  const byName = new Map(live.cards().map((card) => [card.getAttribute(CARD_ATTR), card]))
+  const cards = live.cards()
+  const byName = new Map(cards.map((card) => [card.getAttribute(CARD_ATTR), card]))
   const pairs = Object.entries(PARENTS).filter(([child, parent]) => byName.has(child) && byName.has(parent))
-  assert(pairs.length === Object.keys(PARENTS).length, `已安装的 17 个包里，对照表的 ${Object.keys(PARENTS).length} 对应当都在（实际 ${pairs.length}）`)
-  for (const [child, parent] of pairs) {
-    const c = byName.get(child), p = byName.get(parent)
-    assertEqual(c.getAttribute(CHILD_ATTR), '1', `${child} 应标成 ${parent} 的第 1 个补丁`)
-    assertEqual(p.getAttribute(PARENT_ATTR), '1', `${parent} 应标成有 1 个补丁`)
-    assertEqual(Number(c.style.order), Number(p.style.order) + 1, `${child} 应排在 ${parent} 后一位`)
-    assertEqual(c.style['--dsh-pg-badge'], '"补丁"', `${child} 的小标签`)
-    assertEqual(p.style['--dsh-pg-badge'], '"1 个补丁"', `${parent} 的小标签`)
-    assertEqual(mod.__testing.categoryOf(child).id, mod.__testing.categoryOf(parent).id, `${child} 应与 ${parent} 同类`)
+  assert(pairs.length === Object.keys(PARENTS).length,
+    `已安装的 ${KNOWN_INSTALLED.length} 个包里，对照表的 ${Object.keys(PARENTS).length} 对应当都在（实际 ${pairs.length}）`)
+
+  // 补丁序号按「卡片在列表里的先后」数（client 就是这么数的），所以期望值也从卡片顺序推，
+  // 不写死 1 —— dsh-story-turing、dshmarket、dsh-claude-style 各有一个补丁，以后可能更多。
+  const childrenOf = new Map()
+  for (const card of cards) {
+    const child = card.getAttribute(CARD_ATTR)
+    const parent = PARENTS[child]
+    if (parent === undefined || !byName.has(parent)) continue
+    if (!childrenOf.has(parent)) childrenOf.set(parent, [])
+    childrenOf.get(parent).push(child)
   }
-  // 点「界面与外观」：皮肤修补和 Claude Code 风格一起在
+  assert(childrenOf.size > 0, '一张补丁卡片都没挂上')
+  for (const [parent, children] of childrenOf) {
+    const p = byName.get(parent)
+    assertEqual(p.getAttribute(PARENT_ATTR), String(children.length), `${parent} 应标成有 ${children.length} 个补丁`)
+    assertEqual(p.style['--dsh-pg-badge'], `"${children.length} 个补丁"`, `${parent} 的小标签`)
+    children.forEach((child, k) => {
+      const c = byName.get(child)
+      assertEqual(c.getAttribute(CHILD_ATTR), String(k + 1), `${child} 应是 ${parent} 下第 ${k + 1} 个补丁`)
+      assertEqual(Number(c.style.order), Number(p.style.order) + k + 1, `${child} 应紧跟在 ${parent} 后面第 ${k + 1} 位`)
+      assertEqual(c.style['--dsh-pg-badge'], '"补丁"', `${child} 的小标签`)
+      assertEqual(mod.__testing.categoryOf(child).id, mod.__testing.categoryOf(parent).id, `${child} 应与 ${parent} 同类`)
+    })
+  }
+  // 点「界面与外观」：皮肤、两个补丁一起在
   live.tabbar()[0].children[0].listeners.get('click')[0]({ target: live.tab('ui') })
-  assert(live.visibleNames().includes('dsh-skin-fixes') && live.visibleNames().includes('dsh-claude-style'), '「界面与外观」里应同时有父插件和补丁')
+  assert(['dsh-claude-style', 'dsh-claude-style-addons'].every((name) => live.visibleNames().includes(name)),
+    '「界面与外观」里应同时有皮肤和它的补丁')
   live.dispose()
   assert(live.cards().every((card) => !card.hasAttribute(CHILD_ATTR) && !card.hasAttribute(PARENT_ATTR) && !card.style.order), '卸载后补丁标记与排序都应摘干净')
   // 父插件没装：补丁不缩进、不标记
   const lonely = scenario({ packages: KNOWN_INSTALLED.filter((name) => name !== 'dsh-claude-style') })
-  const skin = lonely.cards().find((card) => card.getAttribute(CARD_ATTR) === 'dsh-skin-fixes')
-  assert(!skin.hasAttribute(CHILD_ATTR), '父插件不在时补丁不该缩进')
+  for (const child of ['dsh-claude-style-addons']) {
+    const card = lonely.cards().find((item) => item.getAttribute(CARD_ATTR) === child)
+    assert(card !== undefined, `${child} 应当还在页面上`)
+    assert(!card.hasAttribute(CHILD_ATTR), `父插件不在时 ${child} 不该缩进`)
+    assert(!card.hasAttribute(PARENT_ATTR), `父插件不在时 ${child} 不该被标成父插件`)
+  }
   lonely.dispose()
   return pairs.map(([child, parent]) => `${child} → ${parent}`).join('，')
 })

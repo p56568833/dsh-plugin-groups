@@ -40,7 +40,7 @@ dsh plugin --profile web add github:p56568833/dsh-plugin-groups
 | 表 | 作用 |
 |---|---|
 | `CATEGORIES` | 数组顺序 = Tab 顺序。`packages` 是精确包名（优先），`keywords` 是给以后新装插件的包名兜底正则。按**包名**分类而不是按显示标题，因为标题会被汉化插件改写、还会跟界面语言变。 |
-| `PARENTS` | `补丁包名 → 父插件包名`。用到别的补丁插件就往里加一行。自带的几对来自作者自己的环境，两边都装了才会显示。 |
+| `PARENTS` | `补丁包名 → 父插件包名`。用到别的补丁插件就往里加一行。自带的几对来自作者自己的环境，两边都装了才会显示：`dsh-skin-fixes`、`dsh-cn-greeting` → `dsh-claude-style`；`dsh-story-progress` → `dsh-story-turing`；`dsh-market-sidebar` → `dshmarket`。 |
 
 Tab 名跟着页面自己的语言走：页头是「插件」用中文，是 "Plugins" 用英文。
 

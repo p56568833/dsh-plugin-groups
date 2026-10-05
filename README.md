@@ -43,7 +43,7 @@ Everything lives at the top of `client.js`:
 | Table | What it does |
 |---|---|
 | `CATEGORIES` | Tab order = array order. `packages` are exact package names (checked first); `keywords` are regexes on the package name for plugins you install later. Matching is by **package name**, not by the displayed title, because titles change with translation plugins and UI language. |
-| `PARENTS` | `patch package → parent package`. Add a line for any patch plugin you use. The shipped entries are examples from the author's setup; a pair only shows when both plugins are installed. |
+| `PARENTS` | `patch package → parent package`. Add a line for any patch plugin you use. The shipped entries are examples from the author's setup and only show when both plugins are installed: `dsh-skin-fixes`, `dsh-cn-greeting` → `dsh-claude-style`; `dsh-story-progress` → `dsh-story-turing`; `dsh-market-sidebar` → `dshmarket`. |
 
 Tab labels follow the page's own language (Chinese when the page heading is Chinese, English otherwise).
 
